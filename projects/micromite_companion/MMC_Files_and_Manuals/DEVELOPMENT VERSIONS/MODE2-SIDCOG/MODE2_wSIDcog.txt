@@ -1,0 +1,42 @@
+I2C SID Commands
+================
+
+220:	SID.Start
+
+221:	SID.PLAY channel, freq, waveform, attack, decay, sustain, release
+' channel - The SID channel to use. (0 - 2)  
+' freq - Note to Frequency Converter (1 - 255)
+' waveform - The waveform combination to use. 
+--TRIANGLE = 16, SAW = 32, SQUARE = 64, NOISE = 128   
+' attack - The attack value. (0 – 15)
+' decay - The decay value. (0 - 15) 
+' sustain - The sustain value. (0 - 15)  
+' release - The release value. (0 - 15)   
+
+222:	SID.STOP
+
+223:	SID.Volume volume
+'  volume (0-15)
+
+224:	SID.ADSR channel, attack, decay, sustain, release
+' channel - The SID channel to use. (0 - 2)   
+' attack - The attack value. (0 - 15)  
+' decay - The decay value. (0 - 15)  
+' sustain - The sustain value. (0 - 15)   
+' release - The release value. (0 - 15) 
+
+225:	SID.Noteon channel, freq
+' channel - The SID channel to use. (0 - 2)  
+' freq - Note to Frequency Converter (1 - 255)
+
+226:	SID.Noteoff channel
+' channel - The SID channel to use. (0 - 2)  
+
+227:	SID.Noteon voice1, voice2, voice3  'play voice if greater than 0
+
+228:	SID.SetWaveForm channel, waveform
+' channel - The SID channel to use. (0 - 2)  
+' waveform - The waveform combination to use. 
+--TRIANGLE = 16, SAW = 32, SQUARE = 64, NOISE = 128   
+
+229: 	SID.AllVoicesOff
