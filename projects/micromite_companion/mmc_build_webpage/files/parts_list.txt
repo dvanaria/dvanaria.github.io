@@ -1,0 +1,39 @@
+                     Parts List for the MMC v1.2
+
+
+AJ1             Audio Jack 
+BR1             Breadboard
+C1,2,5,6        .1uF
+C3,4,6,9        47uF
+C12             47uF tantalum
+D1              Power Led
+D5              1N4007
+IR1             TSOP38238
+J1              VGA Connector
+J2,5            4 pin right angle male header
+J4,8            3 pin dual row header or Switch
+J6              3 pin male header
+J12             6 pin right angle male header
+J3              5 pin dual row header
+J7              DC Power Jack
+J9,10,11        16 pin female header
+K1              6 pin mini din 
+R1,2,4,8,11     240 ohm
+R3,7,18,19      1K or 1.1K
+R5,9,12,29      470 ohm
+R6,10,13        120 ohm
+R15,17          100 ohm
+R14,16,20-28    10K
+U1              P832AD40
+U2              24LF256 32K EEProm
+U3              32MX170F256
+U5              23LC256 32K sram
+U8              78M033 3.3V Reg
+U6              78M05 5V Reg
+X1              5Mhz
+
+Additional Components:
+1. Sockets for all ICs (total of 4)
+2. Reset Button
+3. SD Card Connector (this is a surface mounted component)
+4. Jumpers - 2 Pin (total of 6)
