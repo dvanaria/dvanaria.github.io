@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Project Main Page</title>
+  <link type="text/css" rel="stylesheet" href="css/my-first-stylesheet.css"/>
+</head>
+
+<body>
+  <header>
+    <p></p>
+    <h1>PIC32 to RTC Communication via MMBASIC (3-wire Protocol)</h1>
+    <nav>
+      <ul>
+        <li class="selected">Project Main Page</li>
+        <li><a href="https://github.com/dvanaria/micromite_projects.git" target="_blank">Source Code (GitHub Repo)</a></li>
+        <li><a href="https://dvanaria.github.io/">Back to Darron Vanaria's Portfolio</a></li>
+      </ul>
+    </nav>
+  </header>
+  <article>
+    <div>
+      <h1>Set Micromite MMBASIC's DATE and TIME Variables using External RTC Module (DS1302 RTC as part of a Velleman VMA301 Module)</h1>
+      <p>
+        <img class"large" src="images/image001.jpg" alt="main project image" />
+      </p>
+      <p>
+         A "Micromite" is a PIC32 microcontroller with MMBASIC firmware 
+         loaded onto it, allowing the user to create BASIC programs that 
+         have access to the PIC32's peripherals and capabilities using a 
+         beginner-friendly, high level language. </p>
+      <p>
+         The MMBASIC environment has some system variables which keep track 
+         of the PIC32's internal timer (which can be used to derive a time 
+         and date). These variables get reset to midnight of January 1, 2000 
+         on each power cycle (because the timer these values are based on is
+         reset with each power cycle). Here's what those variables hold soon 
+         after power on: </p>
+
+      <p>   > PRINT DATE$  </p>
+      <p>   01-01-2000     </p>
+      <p>   > PRINT TIME$  </p>
+      <p>   00:00:10       </p>
+      
+      <p>
+         In order to have the actual (current, real-world) date and time, an 
+         external RTC module can be used. This project uses a DS1302 chip that 
+         is hooked up to a backup battery source (a CR2032 3V coin battery) to
+         maintain the time when the power to the PIC32 is off. Specifically, a 
+         module made by Velleman, called the VMA301, is used. This module has 
+         the DS1302 chip, an external clock crystal, the backup battery, and 
+         external pins (4 of which are used in this project: GROUND, DATA, CLOCK, 
+         RESET).          
+      </p> 
+
+      <p>
+         This project physically hooks up the RTC module to a minimal Micromite 
+         setup (which is on a breadboard), and two BASIC functions are written 
+         which can be used to interact with the VMA301 module:     
+      </p>
+      <p>
+        <img class"large" src="images/image003.png" alt="main project image" />
+      </p>
+
+
+      <p>
+         The user interacts with the Micromite using a terminal emulator such 
+         as Tera Term, running on a computer connected to the Micromite via a 
+         USB cable. Here's what the input/output looks like for each of the 
+         BASIC programs that were built for this project:
+            <img class"large" src="images/image005.png" alt="main project image" />
+            <img class"large" src="images/image007.png" alt="main project image" />
+      </p>
+    </div>
+
+
+    <section>
+      <h2>Project Setup</h2>
+      <p>
+        <img class="small" src="images/image009.png" alt="Micromite on breadboard minimal setup" />
+      </p>
+
+      <p>1. First make sure all the connections are in place on the Micromite breadboard 
+            (so without the VMA301 connected) and that a stable connection can be made to 
+            Tera Term. Set the terminal emulator to 80 x 30 characters, 38400 baud. 
+            </p>
+      <p>2. Note the connections from PINs 11 and 12 to the TX and RX pins on the FTDI module.
+            PIN 11, labeled "Console Tx" in the micromite manual, goes to the pin labeled "RXD" on the FTDI board
+            PIN 12, labeled "Console Rx" in the micromite manual, goes to TXD.
+            </p>
+      <p>3. The FTDI board converts a UART signal from the PIC32 to a USB transmission, where it 
+            is then converted back to a UART signal on the host computer. The host must have an FTDI 
+            driver which presents an available USB port as a COM port (for serial communication).
+            </p>
+      <p>4. A diagram of the PIC32MX pinout will be needed to decide which pins will be used for digital 
+            input/output. This can be found in the Micromite manual.
+            </p>
+      <p>5. Connect the VMA301 to the Micromite using the following connections:
+         <ul>
+             <li>RST (red wire)</li>
+             <li>SCLK (yellow wire)</li>
+             <li>DAT (green wire)</li>
+             <li>GND (black wire)</li>
+         </ul>
+            <img class"small" src="images/image013.png" alt="VMA301 wiring" />
+        </p>
+      <p>6. Connect these wires to the PIC32 breadboard:
+         <ul>
+             <li>green wire -> PIN 2</li>
+             <li>yellow wire -> PIN 4</li>
+             <li>red wire -> PIN 6</li>
+             <li>black wire -> ground rail</li>
+         </ul>
+            <img class"small" src="images/image015.png" alt="PIC32 wiring" />
+         </p>
+ 
+     </p>
+    </section>
+
+
+
+
+
+
+
+
+
+    <section>
+      <h2>Project Solution, Part 1: Research DS1302</h2>
+      <p>
+      Starting with the DS1302 datasheet, I gathered information about how the DS1302 chip worked. 
+      (note: MMBASIC supports other RTC chips directly in it's BASIC software library, utilizing 
+       standard I2C communication protocols, but the chip used in this project, the DS1302, isn't 
+       on the supported list, as it uses a proprietary 3-wire communication, requiring a careful 
+       reading of the datasheet and a "bit banging" software solution).
+      </p>
+      <p>
+   <ul>
+    <li>31 memory locations, data retained via coin battery
+    <li>can be set for single byte or multiple byte communication (only single byte is used in this project).
+    <li>the real-time clock/calendar provides seconds, minutes, hours, day, date, month, year, and compensates for leap-years.
+    <li>only 3 wires are needed for interacting with the chip:
+                <ul>
+                <li>CE</li>
+                <li>I/O (data line)</li>
+                <li>SCLK (serial clock)</li>
+                </ul>
+    <li>Here is a block diagram of how the chip is organized internally:
+ 
+            <img class"small" src="images/image019.png" alt="VMA301 wiring" />
+    <li>a single-byte command is sent over the serial line (from host to DS1302) and retained in the Input Shift Register to be processed. Then, depending of whether it is a READ or WRITE operation, data is received from the host, or data is loaded from one of the internal 31 registers into the shift register to be serially output to the host.
+    <li>Here is how the DS1302 chip is wired inside the VMA301 module:</li>
+      <ul>
+      <li>Vcc2 (pin 1) is connected to the coin battery (backup battery)
+      <li>Vcc1 (pin 8) this can be connected to the Micromite's power rail, so that when the micromite is on, it will supply power to the VMA301 module, drawing no current from the coin battery while communicating with the micromite.
+      <li>pins 2 and 3 are connected to a crystal on the VMA301 board. (32 kHz)
+      <li>CE (pin 5) must be asserted high during a read or write. This pin has an internal pulldown resistor to ground. If the CE input is low, all data transfer terminates and the I/O pin goes to a high-impedance state.
+      <li>I/O (pin 6) has an internal pulldown resistor.
+      <li>SCLK (pin 7) is used to synchronize data movement on the serial interface. The solution to this project manually bit-bangs this signal to carefully control the communication over the serial line. This pin also has an internal pulldown resistor. A clock cycle is a sequence of a rising edge followed by a falling edge. For data inputs, data must be valid during the rising edge of the clock and data bits are output on the falling edge of clock. 
+      </ul>
+    <li>Command byte has the following format:
+                <ul>
+                <li>bit 7, high bit - always 1</li>
+                <li>bit 6, high (1) = RAM access request, low (0) = CK</li>
+                <li>bit 5 - bit 1 (5 bits) A4 through A0</li>
+                <li>bit 0, low bit - high (1) = READ, low(0) = WRITE</li>
+                </ul>
+
+    <li>DATA INPUT: Following the eight SCLK cycles that input a write command byte, a data byte is input on the rising edge of the next eight SCLK cycles. Additional SCLK cycles are ignored should they inadvertently occur. Data is input starting with bit 0.
+    <li>DATA OUTPUT: Following the eight SCLK cycles that input a read command byte, a data byte is output on the falling edge of the next eight SCLK cycles. Note that the first data bit to be transmitted occurs on the first falling edge after the last bit of the command byte is written. 
+
+    <li>An important note about the serial communication:
+                <ul>
+                <li>The command byte is sent to the DS1302 lowest bit first (bit 0), then bit 1, bit 1, all the way to bit 7.</li>
+                <li>The data byte following the command byte is also sent bit 0 first, then bit 1, etc.</li>
+                <li>Notice that these command bytes are encoded in BASIC arrays, with the highest bit of the command byte (bit 7) located at index 0 of the array. Bit 6 of the command byte is located at index 1. </li>
+                </ul>
+ 
+    <li>Therefore, when sending bits, and you want to send bit 0 of the command byte first, you actually have to send index 7, then index 6, and so on.
+   </ul>
+  </p>
+    </section>
+
+
+
+
+
+    <section>
+      <h2>Project Solution, Part 2: Implement MMBASIC Code for SETTIME</h2>
+      <p>
+        Run this program to gather current date/time from the user (from command line), 
+        and the program will communicate with the DS1302 to update it's memory/registers.
+        The following is pseudocode for how the program functions.  You can see the 
+        actual source code <a href="source_code/DS1302_SETTIME.BAS" target="_blank">here</a>.
+      </p>
+    <ul>
+        <li>3 lines are used for the 3-wire communication protocol: DAT, SCLK, and RST
+        <li>The PIC32 is assignd a pin for each of these (pins 2, 4, and 6 respectively), and these are set to Digital Output mode. 
+        <li>A global array OUTPUT_DATA(0-7) is declared to hold a data payload for writing to the DS1302.
+        <li>6 arrays are declared to each hold the command byte needed for the 6 writes (SEC, MIN, HOUR, DATE, MONTH, and YEAR).
+        <li>The user asked to enter the current time in format HH:MM:SS. These are captured in a single string input, then split up (using BASIC's MID$ function) into individual integers. 
+        <li>These integers are sent as an argument to the SET_OUTPUT function, which breaks apart the 2-digit numeric argument and splices it into the global OUTPUT_DATA array, 4 bits per digit (also known as BCD).
+        <li>Numeric data is sent as BCD (Binary Coded Decimal), so a separate function is used that takes a two digit number and convert it into two separate encoded decimals. A global array (size 8) called OUTPUT_DATA is loaded with this information
+             <ul>
+                <li>Example: 23 (stored as 10111)</li>
+                <li>OUTPUT_DATA[0-3] = 0010  (2)</li>
+                <li>OUTPUT_DATA[4-7] = 0011  (3)</li>
+             </ul>
+        <li>The WRITE_TRANSFER function is then called with the appropriate command byte (so when writing HH, hours, the COMMAND_WRITE_HOUR() array is sent to the WRITE_TRANSFER function as an argument).
+        <li>Here's how transfer works:
+             <ul>
+                <li>all three lines (DAT, SCLK, RST) are set low (0). When SCLK is brought to 0, this is the first stage of initiating a transfer.</li>
+                <li>The RST line is brought high (1) as the second stage of initiating a transfer. The DS1302 chip is now ready to accept a command byte.</li>
+                <li>The command byte is sent, being careful to send in the least significant bit first. Care must be taken because its easy to confuse array indices in BASIC and bit locations in the DS1302's registers. Bit 0 in the chip's register will correspond to index 7 of the array in BASIC. Bit 1 corresponds to index 6, and so on.</li>
+                <li>Once the command byte has been sent (the SCLK toggled after each bit is sent) the data payload is immediately sent next.</li>
+                <li>Setting pin RST to 0 ends the transfer.</li>
+                <li>This process is repeated to gather date information in the same manner.</li>
+            </ul>
+    </section>
+
+
+
+    <section>
+      <h2>Project Solution, Part 3: Implement MMBASIC Code for GETTIME</h2>
+      <p>
+        "GETTIME" in this sense refers to "getting" the date/time information
+        that is stored on the DS1302 and using it to set MMBASIC's TIME$ and DATE$ variables.
+        The following is pseudocode for how the program functions. You can see the 
+        actual source code <a href="source_code/DS1302_GETTIME.BAS" target="_blank">here</a>.
+      </p>
+      <p>
+   <ul>
+      <li>PIC32 pins are assigned (pin 2 = DAT, pin 4 = SCLK, pin 6 = RST)
+      <li>Command bytes are declared and defined
+      <li>No user input is needed, as the program directly requests the required information in 6 calls:
+         <ul>
+          <li>SECONDS
+          <li>MINUTES
+          <li>HOURS
+          <li>DATE
+          <li>MONTH
+          <li>YEAR
+         </ul>
+      <li>These values are captured as strings, then concatenated into two strings, T$ and D$.
+      <li>TIME$ an DATE$ (the system variables that are part of MMBASIC) are assigned directly, using T$ and D$
+    </ul>
+    </section>
+
+  </article>
+
+
+
+
+  <aside>
+    <section>
+      <h2>References</h2>
+      <ul>
+        <li><a href="images/image011.png" target="_blank">PIC32MX pinout diagram</a></li>
+        <li><a href="images/image021.png" target="_blank">DS1302 timing diagram 1</a></li>
+        <li><a href="images/image023.png" target="_blank">DS1302 timing diagram 2</a></li>
+        <li><a href="images/image027.png" target="_blank">DS1302 timing diagram 3</a></li>
+        <li><a href="images/image025.png" target="_blank">DS1302 command byte format</a></li>
+      </ul>
+      </p>
+    </section>
+    <section>
+      <h3>DS1302 Datasheets</h3>
+      <ul>
+        <li><a href="references/DS1302_DATASHEET.pdf" target="_blank">Datasheet ver. 1</a></li>
+        <li><a href="references/DS1302_DATASHEET_2.pdf" target="_blank">Datasheet ver. 2</a></li>
+      </ul>
+
+
+
+      <p>
+      <p>
+    </section>
+    <section>
+      <h2>Development Tips</h2>
+      <p>I prefer to use a third-party text editor such as Vim and then cut/paste my code into Tera Term.  
+         This way, I can keep a saved copy of the code.
+      </p> 
+      <p>
+      To use this development method:
+      <ol>            
+        <li> start Tera Term</li>
+        <li> type AUTOSAVE at the console</li>
+        <li> cut and paste code into Tera Term window (to paste, right-click in the Tera Term window 
+             and it will bring up a sub-window with all the text loaded)</li>
+        <li> Click OK (sub-window)</li>
+        <li> Ctrl-z (to end AUTOSAVE sequence)</li>
+      </ol>
+      </p>
+    </section>
+
+
+    <section>
+      <h2>Terminal Emulator Setup</h2>
+      <ol>            
+        <li> Connect Micromite breadboard (with FTDI module) to Windows 10 laptop via USB cable.</li>
+        <li> Launch Tera Term on laptop</li>
+        <li> Serial connection to COM8 (port will vary)</li>
+        <li> Setup -> Terminal -> 80 x 30</li>
+        <li> Setup -> Serial Port -> Speed = 38400 baud</li>
+      </ol>
+      </p>
+    </section>
+
+  </aside>
+
+
+  <footer>
+    <p class="contact">Contact: <a href="mailto:dvanaria@gmail.com">dvanaria@gmail.com</a>
+    </p>
+  </footer>
+</body>
+
+</html>
+

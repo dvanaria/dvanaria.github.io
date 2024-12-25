@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nandland Go Board (FPGA)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #444;
+            padding: 0 10px;
+            background-color: #d4f7e0;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        },
+
+        hr.rounded {
+           border-top: 8px solid #bbb;
+           border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>FPGA Development with the Lattice iCE40 HX1K (Nandland Go Board)</h1>
+      <ul>
+        Page maintained by <a href="https://dvanaria.github.io/">Darron Vanaria</a>
+      </ul>
+      </div>
+        <aside>This page covers using the Nandland Go Board along with 
+                tools from Lattice Semiconductor and Siemens AG (Mentor Graphics) to learn the basics of FPGA development.
+                The bitstreams for the Lattice iCE40 product line can be built using an entirely open-source toolchain,
+                as well as with proprietary tools from Lattice itself.</aside>
+
+
+
+
+
+
+<br>
+<br>
+<hr class="rounded">
+
+
+
+      <div style="text-align: center;">
+        <h2>PROJECTS (from Nandland.com)</h2>
+      </div>
+
+<p>
+There are 10 projects from Russell Merrick's website (Russell is the designer and creator
+of the Nandland Go board) that run through the fundamental concepts of FPGA programming. His
+website and tutorials are highly recommended!
+</p>
+<p>
+The following are my own notes and interpretation of his tutorials. For many of the easier
+designs, they follow his tutorials fairly closely, but for some of the more complex desings (specifically
+the VGA implementation) I have come up with my own interpretations and designs.
+</p>
+<p>
+The following are my notes and source code for each project.
+</p>
+      <ul>
+      <li><a href="./fpga_projects/1/project_1.htm">Project 1 (Push button to control LED)</a>
+      <li><a href="./fpga_projects/2/project_2.htm">Project 2: Implement an AND Gate with a Look Up Table (LUT)</a>
+      <li><a href="./fpga_projects/3/project_3.htm">Project 3: Register (D-Flip-Flop) to implement State Machine</a>
+      <li><a href="./fpga_projects/4/project_4.htm">Project 4: Mechanical Bouncing and In-Circuit Debounce</a>
+      <li><a href="./fpga_projects/5/project_5.htm">Project 5: How to Drive a 7-Segment Display</a>
+      </ul>
+
+<hr class="rounded">
+
+<br>
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <aside> The iCECube2 toolchain from Lattice is lightweight and simple to use when compared to 
+                competing toolchains from Intel/Altera (Quartus) and AMD/Xilinx (Vivado). The open source tool IceStorm 
+                is the alternative toolchain for the Lattice iCE40. </aside>
+
+    </header>
+
+
+
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="images/1.png" alt="dev board image" />
+      </div>      </p>
+      <p>
+
+
+
+
+<h2>
+The FPGA:
+</h2>
+
+
+This board uses the Lattice iCE40 HX1K (the 1K in its name refers to 1280 Logic Cells, each Cell contains a 4-input LUT and d-flip-flop):
+<ul>
+ <li>Device Family: iCE40</li>
+ <li>Device: HX1K</li>
+ <li>Device Package: VQ100</li>
+</ul>
+
+
+      <div style="text-align: center;">
+         <img class"large" src="images/2.png" alt="dev board image" />
+      </div> 
+         
+        <div style="text-align: center;"> This package variation has 25 pins per side (100 total)</div>
+
+<h2>
+Lattice Semiconductor:
+</h2>
+<ul>
+Lattice Semiconductor (NASDAQ: LSCC) is the "low power programmable leader."<br />
+Headquaters are in Hillsboro, Oregon.<br />
+</ul>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/3.png" alt="dev board image" />
+      </div> 
+
+
+<br>
+<br>
+<br>
+<hr class="rounded">
+<br>
+<br>
+
+
+
+<h2>
+Demo Program
+</h2>
+
+<p>
+This dev board comes with a demo program to test out the peripherals. This program can be downloaded from <a href="https://nandland.com">Nandland.com</a>
+ (a bitmap FPGA image in the form of a .bin file):
+</p>
+
+      <div style="text-align: center;">
+          <a href="./references/Go_Board_Full_Test_bitmap.bin">Go_Board_Full_Test_bitmap.bin</a><br />
+      </div> 
+<br>
+The Demo program does the following:
+<ol>
+<li>The board is powered by connecting it to a host computer (micro-USB to the board, and USB-A on the host side). The green power light on the board should light up.</li>
+
+<li>Each of the push buttons individually lights up a different LED.</li>
+
+<li>Push button 1 will start a demo of the two 7-segment displays, lighting up the various segments.</li>
+
+<li>Launching a terminal emulator like Tera Term will establish a UART connection to the board, and the demo program will accept keyboard input from the host, send it to the FPGA, and return each character to the host to be displayed in the terminal emulator.</li>
+
+<li>The VGA connector can be connected to a VGA monitor, and test patterns can be displayed using the keyboard numeric keys.</li>
+</ol>
+
+
+<h2>
+Setting up the Programmer Tool
+</h2>
+
+<p>
+In order to get the .bin program onto the Go Board, a subset of the toolchain needs to be installed. The Diamond Programmer needs to be installed in order to program the FPGA from the .bin file. Tera Term is needed to interact with the demo program:
+</p>
+       <div style="text-align: center;">
+         <img class"large" src="images/4.png" alt="dev board image" />
+      </div> 
+
+Technically, to load the demo .bin program, only the Diamond Programmer is needed:
+<ul>
+<li>The Go Board has an IC that converts the micro-USB port into an SPI interface. </li>
+
+<li>The program is stored onboard in Flash memory. The FPGA boots up from Flash memory.</li>
+
+<li>Since an SPI interface is being used, the Diamond Programmer won't be able to detect the cable:</li>
+       <div style="text-align: center;">
+         <img class"large" src="images/5.png" alt="dev board image" />
+      </div>  
+<br>
+<li>After selecting OK, select the Device Family and Device, as well as navigating to the downloaded .bin file and set the following additional settings:</li>
+        <div style="text-align: center;">
+         <img class"large" src="images/6.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Click OK and then select Deisgn -> Program</li>
+        <div style="text-align: center;">
+         <img class"large" src="images/7.png" alt="dev board image" />
+      </div> 
+</ul>
+
+
+
+
+<h2>
+Running the Demo
+</h2>
+
+<ol>
+<li>Pressing each of the 4 push buttons will light up a different LED.</li>
+
+<li>Pressing push button 1 will also launch the two 7-segment displays demo</li>
+
+<li>Launch Tera Term on the host computer and configure the serial port</li>
+
+         <div style="text-align: center;">
+         <img class"large" src="images/8.png" alt="dev board image" />
+      </div> 
+
+        <div style="text-align: center;">
+         <img class"large" src="images/9.png" alt="dev board image" />
+      </div> 
+
+ 
+
+<li>Typing on the host computer's keyboard will send the characters to the FPGA demo program, and it will send it back to the host to be displayed on the terminal emulator's screen.</li>
+
+<li>Connect a VGA monitor to the Go Board and press keys 1-5 to see different test patterns on the screen</li>
+        <div style="text-align: center;">
+         <img class"large" src="images/10.png" alt="dev board image" />
+      </div> 
+</ol>
+ 
+
+<br>
+<br>
+<br>
+<hr class="rounded">
+<br>
+<br>
+
+
+<h2>
+Setting up the Full Toolchain
+</h2>
+
+The full toolchain for the Lattice iCE40 HX1K involves the following tools:
+<ol>
+<li>design entry</li>
+<li>simulation</li>
+<li>synthesis</li>
+<li>place & route</li>
+<li>bitstream generation</li>
+<li>programming</li>
+</ol>
+
+Lattice FPGAs are in the unique position to have both proprietary tools (from Lattice itself) 
+to open-source tools available (linux based).
+
+For the tools made by Lattice and other Proprietary (license required) companies:
+<ol>
+<li>design entry            [Lattice iCEcube2]</li>
+<li>simulation              [Siemens ModelSim]</li>
+<li>synthesis               [Lattice iCEcube2]</li>
+<li>place & route           [Lattice iCEcube2]</li>
+<li>bitstream generation    [Lattice iCEcube2]</li>
+<li>programming             [Lattice Diamond Programmer]</li>
+</ol>
+
+Here's a summary of the toolsuite and where it will be installed on a Windows system (along with file sizes)
+        <div style="text-align: center;">
+         <img class"large" src="images/11.png" alt="dev board image" />
+      </div> 
+ 
+<br>
+<br>
+
+The Lattice iCEcube2 IDE requires a license, which (at the time of this writing) is freely available for "hobbyists", 
+though it still expires and is quite a pain to renew. If you start iCEcube2 and receive the following popup, it's time to renew:
+        <div style="text-align: center;">
+         <img class"large" src="images/12.png" alt="dev board image" />
+      </div> 
+
+The steps to get this renewed are the following:
+<ol>
+<li>Find the MAC address for your network interface by opening a command line and running "ipconfig /all"</li>
+        <div style="text-align: center;">
+         <img class"large" src="images/14.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Look on the Lattice website for instructions on how to obtain a free license</li>
+        <div style="text-align: center;">
+         <img class"large" src="images/13.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Write the following email</li>
+      <div style="text-align: center;">
+         <img class"large" src="images/15.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Eventually you'll receive the following email:</li>
+      <div style="text-align: center;">
+         <img class"large" src="images/16.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Follow the link to the Subscription Licensing Form</li>
+      <div style="text-align: center;">
+         <img class"large" src="images/17.png" alt="dev board image" />
+      </div> 
+<br>
+<li>They'll send you the .dat file in another email, along with instructions on where to "install" the license (i.e. where to put the .dat file on your system)</li>
+      <div style="text-align: center;">
+         <img class"large" src="images/18.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Opening iCEcube2 should now be successful</li>
+      <div style="text-align: center;">
+         <img class"large" src="images/19.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Since this license (.dat file) is stored locally on your machine (C:\licenses\FlexLM), and it's tied to your particular machine's MAC address,
+     you'll have to download/install a different license for each machine you plan to develop on.</li>
+</ol>
+
+
+
+ 
+
+<br>
+<br>
+<br>
+<hr class="rounded">
+<br>
+<br>
+
+
+<h2>
+VHDL Overview
+</h2>
+
+<p>
+VHDL (<strong>VHSIC Hardware Description Language</strong>) is a hardware description 
+language that can model the behavior and structure of digital systems at 
+multiple levels of abstraction, ranging from the system level down to that 
+of logic gates, for design entry, documentation, and verification purposes. </p>
+
+<p>
+The language was developed for the US military VHSIC program in the 1980s,
+and has been standardized by the Institute of Electrical and Electronics 
+Engineers (IEEE) as IEEE Std 1076.</p>
+
+<p>
+The <strong>Very High Speed Integrated Circuit (VHSIC) </strong> Program was a United States 
+Department of Defense (DOD) research program that ran from 1980 to 1990.
+Its mission was to research and develop very high-speed integrated circuits 
+for the United States Armed Forces. </p>
+
+<h3>
+Overview of VHDL Syntax
+</h3>
+
+    <ul>
+    The two parts to a VHDL file (.vhd) are <br />
+        <ol>
+        <li>entity (declares the inputs and outputs of the module)<br />
+        <li>architecture (defines how those inputs are processed to produce
+                      the output)<br />
+        </ol>
+<br>
+    For the entity part, each "pin" is declared as a specific type (usually
+    of type "std_logic") as well as a direction (in/out) of the data flow.
+    And each pin is also assigned a name.<br />
+    <ul>
+    This is all declared inside a port() list (looks like a C function call).<br />
+        <ul>
+        Each pin has a name, data direction, and type
+        </ul>
+    </ul>
+<br>
+    All pins are declared inside a port() list. This is similar to a C function
+    call, except each pin is separated by ; instead of ,  <br />
+          <ul>
+          port (  <br />
+                <ul>
+                i_Switch_1 : in std_logic;<br />
+                i_Switch_2 : in std_logic;<br />
+                i_Switch_3 : in std_logic;<br />
+                i_Switch_4 : in std_logic;<br />
+                o_LED_1 : out std_logic;<br />
+                o_LED_2 : out std_logic;<br />
+                o_LED_3 : out std_logic;<br />
+                o_LED_4 : out std_logic<br />
+               );
+               </ul>
+          </ul>
+<br>
+
+    The port list is contained within the entity declaration:
+        <ul>
+        entity p1 is <br />
+            <ul>
+            port(); <br />
+            </ul>
+        end entity p1; <br />
+        </ul>
+<br>
+
+    The architecture section follows a similar syntax, except:
+        <ol>
+        <li>The architecture name is bound to a particular entity name, even
+           though it's recommended to only define one architecture per
+           entity, and only one entity-architecture pair per .vhd file!</li>
+
+        <li>Instead of a port() list, the defintions (behavior) is defined
+           within a begin-end block. The entity section has the "end" keyword
+           too, but no "begin", so really the only difference is that instead
+           of 
+ 
+               <ul>
+               port( ... );<br />
+               </ul>
+
+           you use 
+               
+               <ul>
+               begin ...
+               </ul>
+           </li>
+        </ol>
+<br>
+<br>
+     <ul>
+        <ul>
+        architecture RTL of p1 is<br />
+        begin <br />
+            <ul>
+            o_LED_1 <= i_Switch_1;<br />
+            o_LED_2 <= i_Switch_2;<br />
+            o_LED_3 <= i_Switch_3;<br />
+            o_LED_4 <= i_Switch_4;<br />
+            </ul>
+        end architecture RTL;<br />
+        </ul>
+     </ul>
+
+<br>
+<br>
+
+
+    <h3>
+    Here is VHDL in a nutshell (file e.vhd):
+    </h3>
+
+        <ul>
+        entity e is                                   <br />
+          <ul>port (                                      <br />
+                <ul>in1 : in std_logic;                   <br />
+                    in2 : in std_logic;                   <br />
+                    out : out std_logic                   <br /></ul>
+          
+               );  </ul>                                       
+        end entity e;                                 <br />
+<br>
+        architecture a of e is                        <br />
+           <ul>
+           begin                                      <br />
+                <ul>
+                out <= in1 and in2;                   <br /></ul>
+           </ul>
+        end architecture a;                           <br />
+        </ul>
+
+
+
+<br>
+
+
+    <h3>
+    Another VHDL example:
+    </h3>
+      <div style="text-align: center;">
+         <img class"large" src="images/20.png" alt="dev board image" />
+      </div> 
+<br>
+
+
+    <h3>
+    Yet another:
+    </h3>
+      <div style="text-align: center;">
+         <img class"large" src="images/21.png" alt="dev board image" />
+      </div> 
+<br>
+You can see in that last example (syntax highlighted in green) the necessary
+library to include, in order to access the datatype "std_logic"
+<br>
+
+
+
+
+<br>
+<br>
+<hr class="rounded">
+
+
+
+      <div style="text-align: center;">
+        <h1>PROJECTS (from Nandland.com)</h1>
+      </div>
+
+<p>
+There are 10 projects from Russell Merrick's website (Russell is the designer and creator
+of the Nandland Go board) that run through the fundamental concepts of FPGA programming. His
+website and tutorials are highly recommended!
+</p>
+<p>
+The following are my own notes and interpretation of his tutorials. For many of the easier
+designs, they follow his tutorials fairly closely, but for some of the more complex desings (specifically
+the VGA implementation) I have come up with my own interpretations and designs.
+</p>
+<p>
+The following are my notes and source code for each project.
+</p>
+      <ul>
+      <li><a href="./fpga_projects/1/project_1.htm">Project 1 (Push button to control LED)</a>
+      <li><a href="./fpga_projects/2/project_2.htm">Project 2: Implement an AND Gate with a Look Up Table (LUT)</a>
+      <li><a href="./fpga_projects/3/project_3.htm">Project 3: Register (D-Flip-Flop) to implement State Machine</a>
+      <li><a href="./fpga_projects/4/project_4.htm">Project 4: Mechanical Bouncing and In-Circuit Debounce</a>
+      <li><a href="./fpga_projects/5/project_5.htm">Project 5: How to Drive a 7-Segment Display</a>
+      </ul>
+
+<br>
+<br>
+<br>
+<hr class="rounded">
+<br>
+<br>
+      <div style="text-align: center;">
+        <a href="https://dvanaria.github.io/">Back to Darron Vanaria's Portfolio</a>
+      <ul>
+<br>
+<br>
+
+
+</body>
+
+</html>

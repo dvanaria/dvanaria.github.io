@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nandland Go Board (FPGA)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #FFF;
+            padding: 0 10px;
+            background-color: #825b58;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        },
+
+        hr.rounded {
+           border-top: 8px solid #bbb;
+           border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>Project 2: Implement an AND Gate with a Look Up Table (LUT)</h1>
+      <ul>
+        Page maintained by <a style="color:#D3D3D3;" href="https://dvanaria.github.io/">Darron Vanaria</a><br />
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </ul>
+      </div>
+        <aside>Combinational logic involves logic circuits that produce output solely based
+               on their current input (no memory, or state, or feedback loops needed). In this project
+               a simple AND gate is programmed to show how the FPGA design software will 
+               implement such logic: using one of the many 4-input Look Up Tables (LUTs) available
+               on the FPGA.</aside>
+<br>
+
+      <div style="text-align: center;">
+         <img class"large" src="./images/5.png" alt="dev board image" />
+      </div> 
+
+
+    </header>
+
+<br>
+
+
+
+
+
+
+    <h3>
+    Combinational Logic vs. Sequential Logic
+    </h3>
+    <p>
+    The two "workhorses" of FPGAs are the LUT (Look Up Table) and the D-Flip-Flop (or register).
+    There are no individual logic elements in an FPGA (like AND gates and OR gates) - instead,
+    logic circuits are implemented as a series (a table) of inputs and desired outputs. 
+    </p>
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/4.png" alt="dev board image" />
+      </div>      </p>
+      <p>
+    <p>
+    The iCE40 HX1K has 1024 "logic elements" - and each logic element contains both a 4-input LUT
+    and a Register. On a higher level, there are 8 logic elements arranged into a block called a
+    PLB (Programmable Logic Block): 
+    </p>
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/3.png" alt="dev board image" />
+      </div>
+
+<br>
+<h3>Solution Files:</h3>
+<ul>
+<a style="color:#D3D3D3;" href="./source_code/project_2.v">project_2.v</a><br />
+<a style="color:#D3D3D3;" href="./source_code/project_2.vhd">project_2.vhd</a><br />
+</ul>
+<br>
+
+Here is the solution in VHDL:
+<br>
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/2.png" alt="dev board image" />
+      </div> 
+
+<br>
+The results of the Place and Route steps reveal the single LUT consumed:
+<br><br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/1.png" alt="dev board image" />
+      </div> 
+<br>
+<br>
+
+
+
+
+<br>
+<hr class="rounded">
+<br>
+
+      <div style="text-align: center;">
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </div>
+
+
+<br>
+<br>
+
+
+
+
+
+
+</body>
+
+</html>

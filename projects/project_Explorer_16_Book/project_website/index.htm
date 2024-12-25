@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PIC32 Programming in C Language (Book & Dev Board)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #444;
+            padding: 0 10px;
+            background-color: #f4f0ea;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>C Programming on a PIC32MX Microcontroller</h1>
+      <ul>
+        Page maintained by <a href="https://dvanaria.github.io/">Darron Vanaria</a>
+      </ul>
+      </div>
+        <aside>This page covers using hardware and software from Microchip Technology and a book by Lucio Di Jasio to learn Embedded Programming using the C Programming Language.</aside>
+
+    </header>
+
+
+
+    <div>
+      <p>
+        <img class"large" src="images/project_overview.png" alt="main project image" />
+      </p>
+      <p>
+      <br>
+      <br>
+
+
+
+<h3>
+Hardware Overview:
+</h3>
+        This is a microcontroller development board made by Microchip Technology   
+		(headquartered in Chandler, AZ, just outside of Phoenix). It's called the 
+		"Explorer 16 Development Board" and it was initially released in 2009- 
+		this specific model is the DM240001.</p>
+      <div style="text-align: center;">
+         <img class"large" src="images/IMG_E0690.JPG" alt="dev board image" />
+      </div>
+
+	  <p>
+        This dev board has a socket to plug in a microcontroller (in this case a 
+		PIC32MX microcontroller of the 300 series). The dev board accepts PIMs 
+		(Plug-In Modules) to try out different microcontrollers. These are 
+		100-pin packages, 25 pins per side arranged in a square.</p>
+	  <p>
+        The board has peripheral hardware like LEDs, an LCD screen, a serial port, 
+		and push buttons so you can write some programs to put the PIC32 through it's 
+		paces and see what it can do, interfacing with the world outside the PIM 
+		itself.</p>
+	  <p>
+        The photo also shows the PICkit3 programmer neccessary to load programs onto the microcontroller.
+        Program code is written using Microchip's MPLAB software (on a host computer), and a USB
+        cord connects the host computer to the PICkit3 to send the program over to flash
+        memory on the dev board. </p>
+
+      </div>
+
+
+
+
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Book Overview:
+</h3>
+<p>
+    The book is set up as 16 "Days" worth of material. Each chapter explores one basic hardware peripheral of the PIC32MX
+        family of microcontrollers, and one aspect of the C language per day.
+</p>
+<p>
+    Recommended Hardware and Software to Use with the Book: 
+</p>
+     <ul>
+        <li>Microcontroller: PIC32MX360F512L (100 pin Plug In Module)</li>
+        <li>MCU Core: MIPS M4K</li>
+        <li>Development Board: Explorer 16 Dev Board</li>
+        <li>IDE Software: MPLAB IDE (version 8)</li>
+        <li>Hardware Programmer: PICkit3 </li>
+     </ul>
+<p>
+    All of the above hardware and software is made by Microchip Technology
+    Incorporated (headquartered in Chandler, AZ), with the exception of the
+    microcontroller core design, which is made by MIPS (San Jose, CA).
+</p>
+</div>
+
+<div>
+<p>
+
+  The MCU: 
+    <ul>
+    <li>Microchip Technology Inc. </li>
+    <li>PIC32MX360F512L (on the Explorer 16 Dev Board)</li>
+    <li>80 MHz (configured to 72 MHz)</li>
+    <li>32-bit MIPS M4K Core</li>
+    <li>512K Flash ROM (plus 12K Boot Flash) - stores program</li>
+    <li>32K RAM - stores data and variables</li>
+    <li>Internal 8 MHz (FRC) and 32 kHz (LPRC) oscillators</li>
+    </ul>
+
+  The Dev Board:
+
+    <ul>
+    <li>Microchip Explorer 16 Development Board DM240001</li>
+    <li>Part Number: DM240001</li>
+    <li>Supports processor PIMs for both PIC24 and dsPIC families</li>
+    <li>Alpha-numeric 16 x 2 LCD display</li>
+    <li>Interfaces to MPLAB ICD 3, MPLAB REAL ICE, and PICkit3 programmers (needed 
+            to program the 512K Flash memory with new code/program)</li>
+    <li>Includes Microchip's TC1047A analog output temperature sensor</li>
+    <li>Expansion connector for full device pin-out and bread board prototyping</li>
+    <li>PICTail Plus connector for expansion boards</li>
+    <li>External to PIM: 8 MHz (POSC) and 32768 Hz (SOSC) oscillators</li>
+    </ul>
+
+
+</p>
+</div>
+
+
+
+
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Hardware Setup:
+</h3>
+    <ol>
+    <li>Windows host computer running MPLAB IDE 8.91</li>
+
+    <li>PICkit3 programmer plugged into Explorer 16 board (LEDs face the
+        PIC32 PIM module) and the other end (USB) plugged into the host
+        computer.</li>
+
+     <li>Plug power into Explorer 16 board (optional - you can also set
+                                          the PICkit3 to provide power
+                                          to the board directly, via the IDE
+                                          settings)</li>
+     </ol>
+</div>
+
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+The Programmer (PICkit3):
+</h3>
+
+    <p>
+    In order to program the PIC32, you need a physical device in between
+    your dev board and your computer. There are many devices made for this
+    (all proprietary Microchip products):</p>
+
+        <ul>
+        <li>REAL ICE          (In-Circuit Emulator device)</li>
+        <li>ICD 2             (In-Circuit Debugger device)</li>
+        <li>PIC32 Starter Kit (poorly-named hardware device / programmer)</li>
+        <li>PICkit3           (In-Circuit Debugger/Programmer)</li>
+        </ul>
+
+    <p>
+    How do these connect to the Dev Board?</p>
+
+        <ul>
+        <li>ICSP/ICD port (for the REAL ICE and ICD 2)</li>
+        <li>JTAG port     (for the PIC32 Starter Kit device)</li>
+        <li>PICkit2 port  (for the PICkit3)</li>
+        </ul>
+
+    The PICkit3 supercedes the other devices and it's all you need for every
+    project in the book.
+
+    <br>
+    <br>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/pickit3.png" alt="dev board image" />
+      </div>
+
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Using MPLAB IDE:
+</h3>
+
+
+    Menu options:
+        <ul>
+        <li>Project (Build All)</li>
+        <li>Debugger (Select Tool, Animate, Run, Halt, Step Into, etc)</li>
+        <li>Programmer (Select Tool, Program, Verify, Erase, Settings, etc)</li>
+        </ul>
+
+     <p>
+    The concept:</p>
+
+         <ul>
+          <li>You LOAD a specific tool into the IDE, either the Debugger
+                 or the Programmer (not both, it has to be one or the other).</li>
+
+             <li>The Debugger allows you to step-through your program line
+                 by line (either each C instruction or each assembly 
+                 instruction) and view the contents of Special Function
+                 Registers within the PIC32.</li>
+ 
+             <li>You can run the Debugger either on real hardware or on
+                 the built-in simulator (MPLAB SIM). The simulator has the
+                 added benefit of displaying a signal analyzer.</li>
+
+             <li>The Programmer allows you to just program the PIC32 Flash
+                 memory and run the code on the hardware itself. The MPLAB
+                 SIM is not an option here.</li>
+            </ul>
+
+<p>
+    Here are the options for the Debugger (under Debugger -> Select Tool)
+</p>
+           <ul>
+           <li>MPLAB REAL ICE</li>
+           <li>PIC32 Starter Kit</li>
+           <li>MPLAB ICD 2</li>
+           <li>PICkit3</li>
+           <li>MPLAB SIM</li>
+           </ul>
+<p>
+        The first half of the book can just use the simulator (MPLAB SIM)
+        Debugger, not actually programming the board with the PICkit3. The 
+        second half of the book requires programming the hardware itself.
+</p>
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Setting up the Primary Oscillator Clock Chain
+</h3>
+
+<p>
+    This book really should have started with Day 7, which talks about all
+    the configuration options that are set each time a new program is flashed
+    to the PIC32MX chip.</p>
+<p>
+    These configuration options select which oscillator feeds into the Primary
+    Oscillator Clock Chain (which then defines the System Clock and the 
+    Peripheral Bus Clock, both used extensively in Chapters 1-6)</p>
+<p>
+    This configuration can be set to be programmed whenever you flash new code
+    to the PIC32MX, or can be programmed dynamically in source code. For this
+    book (at least for the early chapters), we'll be setting them directly.</p>
+<p>
+    The high-level idea:
+</p> 
+        <ol>
+        <li>Select the external fast (8 MHz) oscillator</li>
+        <li>Hook this up to a PLL (Phased Locked Loop) in order to scale
+           the incoming signal.</li>
+        <li>An input divider is set to 1:2 (scales 8 MHz to 4 MHz)</li>
+        <li>The PLL scales this to x18 (producing 72 MHz)</li>
+        <li>An output divider is set to 1:1 (no effect)</li>
+        <li>The SYSTEM_CLOCK is then set to 72 MHZ</li>
+        <li>This signal is divided by 2 to define the PERIPHERAL BUS CLOCK
+           (now resulting in 36 MHz)</li>
+        </ol>
+<p>
+    All this is configured by setting just 3 special function registers
+    (because these are each 32-bits wide). Within these SFRs are individual
+    Fields which are set accordingly: 
+</p>
+<p>
+      <div style="text-align: center;">
+        In the IDE, go to Configure -> Configuration Bits, and set the 
+        following:
+      </div>
+</p>
+      <div style="text-align: center;">
+         <img class"large" src="images/init_settings.png" alt="dev board image" />
+      </div>
+
+<p>
+    System Clock = 72 MHz</p>
+<p>
+    Peripheral Bus Clock = 36 MHz
+</p>
+
+
+<br>
+
+
+
+
+<div>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/book.png" alt="dev board image" />
+      </div>
+<h3>
+Book Introduction:
+</h3>
+
+<p>
+    Written in 2008, author has background in 8-bit microcontrollers and
+    assembly language. Now migrating to Microchip's 16-bit and 32-bit MCUs.</p>
+<p>
+    Microchip Inc. has a horrible way of naming their chips:</p>
+
+        <ul>
+        <li>PIC16   (actually an 8-bit MCU)</li>
+        <li>PIC24   (actually a 16-bit MCU)</li>
+        <li>PIC32   (got it right!)</li>
+        </ul>
+<p>
+    "The PIC32 is a powerful machine based on a well established 32-bit
+     core (MIPS)"</p>
+<p>
+        MIPS (Microprocessor without Interlocked Pipelined Stages) is a 
+        family of reduced instruction set computer (RISC) instruction set 
+        architectures (ISA) developed by MIPS Computer Systems, now MIPS 
+        Technologies, based in the United States.</p>
+<p>
+        There are multiple versions of MIPS: including MIPS I, II, III, 
+        IV, and V; as well as five releases of MIPS32/64 (for 32- and 64-bit 
+        implementations, respectively). The early MIPS architectures were 
+        32-bit; 64-bit versions were developed later. As of April 2017, the 
+        current version of MIPS is MIPS32/64 Release 6. MIPS32/64 primarily 
+        differs from MIPS I–V by defining the privileged kernel mode System 
+        Control Coprocessor in addition to the user mode architecture. </p>
+
+<p>
+    Documentation needed for the PIC32MX360F512L (all published by Microchip
+    Technology Inc):</p>
+
+        <ul>
+        <li>PIC32 DataSheet (214 pages, "PIC32MX3xx4xx_datasheet.pdf")</li> 
+        <li>PIC32 Family Reference Manual (1138 pages)</li> 
+
+        <li>MIPS M4K DataSheet (47 pages)</li>
+        <li>MIPS M4K Software User's Manual  (235 pages)</li>
+
+        <li>Explorer 16 Development Board Users Guide (50 pages)</li>
+        </ul>
+
+<p>
+       Power supply: an unregulated DC supply of 9V to 15V (preferably 9V) supplied to J12.
+       For default functionality, a power supply with a current capability of 
+       250 mA is sufficient. The Explorer 16 kit does not include a power 
+       supply.
+</p>
+
+
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Day 1: The Adventure Begins (PortA)
+</h3>
+
+    <p>
+    This chapter focuses on the embedded programming version of "hello world",
+    light up some LEDs. A peripheral is examined: PortA. This is a 12-pin
+    input/output peripheral routed to 12 pins on the PIC32 itself. It is 
+    controlled primarilty by two SFRs:</p>
+
+         <ul>
+         <p>PORTA   (set 1 for +3.3V output, set 0 for 0.0V output)</p>
+         <p>TRISA   (set each pin as an Input or an Output)</p>
+         </ul>
+
+    <p>
+    8 of these pins are connected to LEDs on the Explorer 16 board. These LEDs
+    live right below the PIM module and are in order: bits 7 6 5 4 3 2 1 0.
+    </p>
+
+        <ul>
+        <p>
+        PORTA is 32-bits, so: 0x000000E1</p>
+        <p>      will turn on LEDs in this fashion: 11100001</p>
+        </ul>
+
+    <p>
+    The "Hello World" program introduces the MPLAB IDE and it's built-in MPLAB
+    SIM simulator.</p>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/using_mplab.png" alt="dev board image" />
+      </div>
+
+    <p>
+    The header file contains a long list of definitions for all the internal
+    special-function registers (SFRs).</p>
+
+
+    <p>
+    Running a program:</p>
+
+        <ol>
+        <li>The MCU will first execute a short initialization code segment
+           auto-inserted by the MPLAB C32 linker, known as Startup Code,
+           or "crt0 code".</li>
+
+        <li>The main() function is executed</li>
+        </ol>
+ 
+    <p>
+    I/O pins on the PIC32:</p>
+
+        <ul>
+        <li> Arranged in modules or "ports" of 16 pins each, named A, B, C, D, 
+          E, F, G, H (8 ports total).</li>
+              <ul>
+              Some have fewer. PortA has 12 pins for example.
+              </ul>
+
+        <li> Each port has several SFRs assigned to control its operation.</li>
+
+        <li> Naming:</li>
+              <ul>
+              TRISA (SFR, 32-bits) Set each pins direction: Input or Output</ul>
+              <ul>
+              PORTA (SFR, 32-bits) Set each pins value: 0 or 1</ul>
+        </ul>
+
+    <p>
+    Build All (Project):
+    </p>
+    
+        <ol>
+        <li>Compiler is invoked, generating object code (.o)
+           All the addresses of functions and variables are yet undefined.</li>
+
+        <li>Linker is invoked, proper memory position established. Produces
+           executable (.hex)</li>
+
+        <li>All Source Files will be compiled. All Object Files will be linked
+           together. All Library Files will be used also.</li>
+
+        <li>A Linker Script can be used for advanced config: change the order
+           and priority of data and code sections (book uses default).</li>
+        </ol>
+<br>
+    Building the First Project:
+        <ol>
+        <li>Build All</li>
+
+        <li>Debugger -> Select Tool -> MPLAB SIM</li>
+
+        <li>Open Configure -> Settings -> Debugger (tab)</li>
+               <ul>
+                  Automatically save files before running<br />
+                  Remove breakpoints upon importing a file<br />
+                  Reset device to the beginning of main function<br />
+               </ul>
+        <li>Open View -> Watch, add the PORTA SFR
+
+        <li>Press the Simulator Reset button
+
+        <li>Step through program, see value of PORTA change.
+        </ol>
+
+        <p>
+        ******************************************************************
+        * Important note when using the simulator: That "Simulator Reset
+          Button" is the key - it sets the green arrow / breakpoint to
+          the main() function, and allows you to step through the program
+          from there, using the step-into and step-over buttons.
+        ******************************************************************
+        </p>
+
+    A closer look at PortA:
+
+        <ul>
+        <li>each pin (there are 12 of them) is driven by some
+          somewhat complex logic, mainly 3 signals that reach
+          the output pin (each output pin). Essential in 
+          configuring each pin to be Input or Output.</li>
+
+        <li>default is Input pin for each pin in Port A</li>
+
+        <li>Another SFR, called TRISA, allows you to configure
+          the direction of each pin in PortA. </li>
+
+              <ul>
+              TRISA = 0;      /* sets each pin to Output */
+              </ul>
+        </ul>
+
+    JTAG Port (testing on real hardware, one more step):
+
+        <ul>
+        <li>PortA covers 16 pins of the PIC32 chip (the PIC32MX360F512L
+          has 100 pins total). These pins are multiplexed with another
+          function however, the in-circuit programmer and/or debugger,
+          known as ICSP/ICD (historically) and the JTAG interface (the
+          newer method of communicating with the programmer/debugger.)</li>
+
+        <li>By default, some of the pins (RA0, RA1, RA4, RA5) are set as
+          JTAG port pins, and not I/O pins (in the case of the PIC32
+          Starter Kit board) and the Explorer 16 board is the same.</li>
+
+        <li>You need to disable the JTAG port in order for those pins
+          to be used as I/O pins, and get to the LEDs they are attached
+          to:</li>
+              <ul>
+              DDPCONbits.JTAGEN = 0;
+              </ul>
+        </ul>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/day_1.png" alt="dev board image" />
+      </div>
+
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Day 2: Walking in Circles (Timer1)
+</h3>
+
+    <p>
+    This project expands on Hello World by using another peripheral, Timer1,
+    to systematically turn LEDs on and off. Also covered:</p>
+
+    <ol>
+    <li>Creating a main function that loops forever, instead of the flow of
+       code going straight to exit()</li>
+
+    <li>Peripheral in this module: 16-bit Timer1, driven by Peripheral Bus
+       Clock with selectable prescaler.</li>
+
+    <li>Features of the MPLAB SIM tool: Animate mode, and Logic Analyzer view</li>
+    </ol>
+
+    <ul>
+    <li>Project -> Project Wizard</li>
+    <li>Device: PIC32MX360F512L</li>
+    <li>Active Toolsuite: Microchip PIC32 C-Compiler Toolsuite</li>
+    <li>Configuration Bits: Set SC = 72 MHz and PBC = 36 MHz</li>
+    </ul>
+
+    <p>
+    Key concept: "When the main() function terminates and returns back to the
+                  startup code crt0, a new function _exit() is called and the
+                  PIC32 remains stuck there in a tight loop from which it can
+                  escape only if a processor reset is performed"
+    </p>
+ 
+    <p>
+    A proper application main loop is needed so it doesn't go to this _exit()
+    </p>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/c_program.png" alt="dev board image" />
+      </div>
+    
+    To run this:
+
+        <ul>
+        <li>Debugger -> Select Tool -> MPLAB SIM</li>
+        <li>Debugger -> Animate</li>
+        <li>View -> Watch -> "Add SFR" button (PORTA selected)</li>
+        <li>Step through code to see PORTA value toggle between 00 and FF</li>
+        </ul>
+    
+    To control runtime speed:
+
+        <ul>
+        <li>Debugger -> Settings -> Animation Real Time Updates</li>
+
+        <li>Then run the program using the >> button (Animate)</li>
+
+        <li>The program will run and show you each line it's executing.</li>
+        </ul>
+
+    Timer1:  
+    <p>
+    To run on real hardware, you'll need to utilize the Timer1 peripheral
+    to introduce a delay between toggling the PORTA value (otherwise the
+    LED will toggle several million times a second).</p>
+
+    There are 3 SFRs that control most of Timer1's functions:
+        <ul>
+        TMR1    16-bit counter value (0 to 65,535)<br />
+        T1CON   32-bit SFR, enable Timer1, set Prescaler value<br />
+        PR1     rollover value for TMR1 (default is 65,535)<br />
+        </ul>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/t1con.png" alt="dev board image" />
+      </div>
+
+
+<br>
+
+
+
+
+<div>
+
+<h3>
+Day 3: Message in a Bottle
+</h3>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/datatypes.png" alt="dev board image" />
+      </div>
+
+    <p>
+    Day 3's Project: lighting up the LED set attached to PortA in such a way
+    that when the Explorer 16 board is moved quickly back and forth, a message
+    will appear in big letters.</p>
+
+        Use Logic Analyzer: 
+
+            <ol>
+            <li>Go to Debugger -> Settings -> Osc/Trace tab</li>
+                   <ul>
+                   check Trace All
+                   </ul>
+            <li>Then go to View -> Simulator Logic Analyzer</li>
+
+            <li>Click on the Channels button, add output device pins such as 
+               RA0 for PortA. For this project (Day 3, Message) select all the
+               pins from RA0 to RA7. </li>
+
+            <li>Remember to reduce delay values by a factor of about 100 in 
+               order for the scale of the signal view to be usable/meaningful.</li>
+
+            <li>Neat feature: put the cursor (in the code editor) where you 
+               want the simulator to run to and pause. For Day 3 project, go
+               to the section of the LONG_DELAY so you can see the HELLO 
+               signals on the output pins. Put the cursor there, then r-click
+               and select Run to Cursor. </li>
+            </ol>
+
+    The role of the startup (crt0) code:
+
+        <ol>
+        <li>An array declared in your code will be moved from Flash memory 
+           (where all the program code resides before running) and allocated
+           in RAM, and this happens BEFORE the main() function gets called.</li>
+        <li>All globally declared variables will be initialized to 0 by the
+           crt0 code. This could cause a delay if you have a big global
+           array.</li>
+        <li>You can define a special function:
+              <ul>
+              void _on_reset(void)
+              </ul>
+           if there is time-critical code that needs to run immediately upon
+           power reset (to avoid that potential problem with large allocations
+           before main() runs).</li>
+        </ol>
+        
+
+<br>
+
+
+
+
+<div>
+
+<h3>Day 4: Numbers</h3>
+
+    <p>
+    The PIC32 has 32 registers (32-bits wide), and a 32-bit ALU. </p>
+    <p>
+    The MPLAB C32 compiler assigns the following bit-sizes per datatype:</p>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/data_sizes.png" alt="dev board image" />
+      </div>
+    <p>
+    As far as PERFORMANCE, the 32-bit CPU can work as effienctly on 8, 16,
+    or 32 bit values (one cycle each for math operations, thanks to the MMU
+    and MDU units in the PIC32). 64 bit values will take a slight performance
+    hit though.</p>
+    <p>
+    As far as RESOURCES (limited RAM), datatype choices have direct 
+    consequences. For example, 8-bit values (char) only take up 1 byte of 
+    memory, not 4.</p>
+
+
+      <div style="text-align: center;">
+         <img class"large" src="images/listing.png" alt="dev board image" />
+      </div>
+
+
+    <p>
+    MIPS M4K Core ISA</p>
+        <p>
+        To make sense of the disassembled code above, knowledge of the MIPS
+        M4K ISA is needed. Like all other ISAs, this defines the number of 
+        registers, their definitions/names, the instruction types and 
+        instruction encoding, as well as the overall architecture such as the
+        LOAD-STORE architecture MIPS uses. </p>
+        <p>
+        The LOAD-STORE architecture is also known as "register-to-register"
+        architecture. Basically, it means all operations (math/logic) are
+        performed only on REGISTER contents, and so to work with RAM, values
+        must be brought in from RAM (LOAD) and results must later be stored
+        back into RAM (STORE).</p>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/summary_1.png" alt="dev board image" />
+      </div>
+      <div style="text-align: center;">
+         <img class"large" src="images/summary_2.png" alt="dev board image" />
+      </div>
+      <div style="text-align: center;">
+         <img class"large" src="images/summary_3.png" alt="dev board image" />
+      </div>
+      <div style="text-align: center;">
+         <img class"large" src="images/summary_4.png" alt="dev board image" />
+      </div>
+
+    Review of Instruction Format Fields:
+
+        <ul>
+        <li>opcode    6-bit primary operation code</li>
+
+        <li>rd        5-bit specifier for the destination register</li>
+
+        <li>rs        5-bit specifier for the source register</li>
+
+        <li>rt        5-bit specifier for the target (source/destination) 
+                  register or used to specify functions within
+                  the primary opcode REGIMM</li>
+
+        <li>immed        16-bit signed immediate used for logical operands, 
+                  arithmetic signed operands, load/store
+                  address byte offsets, and PC-relative branch signed 
+                  instruction displacement </li>
+         </ul>
+
+
+    Stepping through a Program:
+    <ul>
+        <li>You can single step through the assembly code if you are in the Listing
+        window, or you can single step through the C code if you're in the 
+        editor window.</li>
+
+        <li>In both cases, you can view several things:
+            <ul>
+          
+            <li>Watch (shows you internal CPU registers)</li>
+
+             <li>Local Variables (shows you variables in the C code, their values)</li>
+            </ul>
+        </li>
+    </ul>
+
+    A note about Reset:
+    <ul>
+        <li>
+        When you want to reset the program:
+            <ul>
+            Debugger -> Reset -> Processor Reset</ul>
+        </li>
+        <li>
+        Note that this doesn't clear RAM or all RAM contents, so variables
+        will retain their previous values! </li>
+    </ul>
+
+      <div style="text-align: center;">
+         <img class"large" src="images/multiply.png" alt="dev board image" />
+      </div>
+
+    Integer Division (32-bit vs. 64-bit)
+    <ul>
+
+        32-bit division can be handled directly, with a single div instruction.<br />
+ 
+        64-bit division will rely on a subroutine:<br />
+            <ul>
+            libgcc2.c (found in MPLAB C32 directory)</ul>
+    </ul>
+
+
+    Floating Point Numbers:
+    <ul>
+
+        Regardless of 32-bit (float) or 64-bit (double, long double), the
+        MPLAB C32 compiler will use library calls (and expensive ones at that)
+        to perform math operations on floating point numbers. 
+    </ul>
+
+    Measuring Performance:
+    <ul>
+        <li>
+        Debugger -> Stop Watch
+        <li>
+        Do this after compiling and linking a project. Then, single-step
+        through the program and the Stop Watch will measure the time!
+        <li>
+        Time is in cycles, in microseconds:
+
+            Debugger -> Settings -> Osc/Trace
+    </ul>
+
+    Compiler Defines Data Size:
+    <ul>
+        <li>
+        The older microcontrollers (16-bit PIC and dsPIC) used an older
+        compiler, MPLAB C30. </li>
+        <li>
+        The PIC32's compiler, MPLAB C32 assigns different widths for each
+        datatype. For example, 'int' is now 32-bits, another name for a 'long'. </li>
+        <li>
+        In the older compiler (C30) an 'int' was 16-bits wide. </li>
+        <li>
+        This makes porting code between compilers difficult, even though the
+        code is written in strict C. </li>
+        <li>
+        There is a library inttypes.h that define exact widths regardless of
+        what compiler, for example:
+            <ul>
+            <li>uint16_t  will always be a 16-bit unsigned integer type</li>
+ 
+            <li>int32_t   will always be a 32-bit signed integer type</li> </li>
+            </ul>
+        <li>
+        Another useful library file, stddef.h, defines a datatype (size_t) that
+        will hold #bytes of another object. And there are many functions in the
+        string.h library that make use of that datatype, like the sizeof()
+        function. </li>
+        <li>
+        MPLAB C32 supports other ANSI C libraries:
+            <ul>
+            limits.h  (holds size limits of all datatypes)<br />
+            float.h   (more size limits)<br />
+            math.h    (things liek M_PI)<br />
+             </li>
+            </ul>
+    </ul>
+
+<br>
+
+
+
+
+<div>
+
+<h3>Day 5: Interrupts</h3>
+
+    <ul>
+    <li>Often microcontrollers can't afford the luxury of a multi-tasking 
+    operating system. Interrupts are used to divide attention to different
+    tasks.</li>
+
+    <li>C doesn't directly support interrupts, so you have to define special
+    functions to implement them. The MPLAB C32 compiler provides support
+    to take advantage of the PIC32's interrupt mechanisms.</li>
+
+    <li>PIC32 = up to 64 distinct interrupt sources</li>
+            <ul>
+            Each can have an ISR (Interrupt Service Routine) defined</ul>
+
+
+
+    <li>The C32 compiler has libraries and language extensions to help.</li>
+    </ul>
+
+    MIPS core
+
+        <ul>
+      
+        <li>The MIPS M4K core handles "exceptions" by maintaining an ISR
+        vector table (a table of function pointers). Interrupts are
+        a type of exception:
+            <ul>
+            divide by zero<br />
+            reset command<br />
+            access to memory that isn't there<br />
+            </ul>
+        </li>
+
+        <li>These ISR vectors can live in Data RAM or Program ROM, or
+        both, and the most important interrupts have default vectors
+        declared/defined at startup. 
+        </li>
+
+        <li>Example Exception Sources:
+            <ul>
+            Reset<br />
+            On-Chip Debug  (used by EJTAG devices)<br />
+            Cache Error<br />
+            General Exception<br />
+            Interrupt<br />
+            </ul>
+        </li>
+
+        <li>Notice just one vector is assigned to "Interrupt". That function
+        uses a special register called "cause" to determine what triggered
+        the interrupt.
+        </li>
+
+        <li>The ISR will first save the execution process of the CPU, called
+        saving the "prologue", and be able to restore it, called the
+         "epilogue".
+        </li>
+
+       </ul>
+
+    ISR for Interrupts:
+
+        <ol>
+        <li>PROLOGUE (save processor state)</li>
+        <li>query CAUSE</li>
+        <li>EPILOGUE (restore previous state)</li>
+        </ol>
+
+    This central Interrupt vector can call any special ISR we define, using
+    the following rules for ISR function definitions:
+
+       <ul>
+       ISR function return type void<br />
+       No arguments allowed - parameter type void<br />
+       These functions can't be called by other functions<br />
+       These functions shouldn't call other functions<br />
+       </ul>
+
+    An example: One of the UART interfaces (there are 2), can generate any of
+                the following 3 interrupts:
+
+        <ol> 
+        <li>New data received and is available in the receive buffer for 
+           processing.</li>
+        <li>When data in the transmit buffer has been sent and the buffer
+           is empty, ready and available to transmit more.</li>
+        <li>When an error condition has been generated and action might be
+           required to reestablish communication.</li>
+        </ol>
+
+    Up to 96 independent events can be managed by the PIC32 interrupt 
+    control module. 
+        <ul>
+        So 96 sources, handled by 64 vectors
+        </ul>
+
+    7 Control Bits per Interrupt
+        <ul>
+        These are dispersed across several SFRs (of course they are).
+            <ol>
+            <li>enable bit (all interrupts off by default) "Interrupt Enable"</li>
+            <li>trigger bit (set when interrupt occurs) "Interrupt Flag"</li>
+            <li>"Group Priority Level" ipl1, ipl2, ... , ipl7
+               The higher the priority level, handled first. The PIC32 itself
+               has a priority level kept in the MIPS core, and so the CPU will
+               ignore any interrupts lower than it's value (3-bits):</li>
+                   <ul>
+                   Core priority level = ipl4<br />
+                   Ignores any interrupts of level ipl1, ipl2, ipl3<br />
+                   </ul> 
+            <li>"Subpriority Level" 2 more bits</li>
+            </ol>
+        </ul>
+
+How to Define an Interrupt Handler in C:
+      <div style="text-align: center;">
+         <img class"large" src="images/interrupt.png" alt="dev board image" />
+      </div>
+
+    
+      
+
+</p>
+
+<br>
+
+
+
+<div>
+<div>
+
+<h3>Summary of Book (Topics):</h3>
+
+<ol>
+   <li>Intro to hardware (PIC32 and Dev Board) and software (MPLAB). Hello World in C.</li>
+   <li>Loops in C. How to use MPLAB's simulator (MPLAB SIM) and compiler (MPLAB C32).</li>
+   <li>Datatype declarations, arrays, for and while loops in C.</li>
+   <li>All numeric datatypes, MCU registers, Disassembly Listings, how division is implemented.</li>
+   <li>Interrupts, interrupt handlers, functions in C, hardware timers.</li>
+   <li>Memory, allocation techniques, Flash vs. RAM, strings in C, Memory Configuration Table, pointers, PIC32MX Bus and Memory Mapping.</li>
+   <li>The Clock System and the Memory Cache System </li>
+   <li>Communication peripherals (UART, I2C, SPI)</li>
+   <li>Asynchronous Communication (RS232 interface)</li>
+   <li>Interfacing with simple LCD screen</li>
+   <li>Analog sensors</li>
+   <li>Reading user input (buttons and sliders)</li>
+   <li>Implementing NTSC video output</li>
+   <li>Storing larger datasets onto SD Card</li>
+   <li>File I/O (File System Implementation)</li>
+   <li>Sound output (analog waveforms)</li>
+</ol>
+
+<br>
+
+
+      <div style="text-align: center;">
+         <img class"large" src="images/chip.png" alt="dev board image" />
+      </div>
+
+<h3>PIC32MX (Microcontroller Concepts Learned):</h3>
+
+<ul>
+
+   <li>Register set</li>
+   <li>MPLAB usage and setup of initialization file</li>
+   <li>How the 32-bit multiplier effects performance </li>
+   <li>Memory management module</li>
+   <li>Counting # assembly instructions (Disassembly Window)</li>
+   <li>Counting instruction cycles (SIM StopWatch)</li>
+   <li>Timers</li>
+   <li>Interrupt system and Interrupt handlers</li>
+   <li>Comparing efficiency of various numeric types</li>
+   <li>The clock system</li>
+   <li>Memory Cache system</li>
+   <li>Protocols of basic communication peripherals (UART, I2C, SPI, RS232)</li>
+   <li>Analog sensors, User Input, Video and Sound output</li>
+
+</ul>
+
+
+      <div style="text-align: center;">
+         <img class"large" src="images/mips_m4k.png" alt="dev board image" />
+      </div>
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="images/pic32.png" alt="dev board image" />
+      </div>
+ 
+<br>
+<br>
+<a href="https://dvanaria.github.io/">Back to Darron Vanaria's Portfolio</a>
+</body>
+
+</html>

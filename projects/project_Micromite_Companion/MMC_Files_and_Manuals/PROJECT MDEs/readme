@@ -1,0 +1,58 @@
+What is an .MDE file?
+=====================
+
+MDE files are mode & style files which can be called from the MMBASIC of Micromite Companion.
+
+MDE files are required for compability with the expanded capabilities of the Micromite Companion.
+
+
+
+How does an .MDE file differ from a MODEX.BIN file?
+===================================================
+
+Actually, they are exactly the same.  The change is only the name and how it is called.
+
+You may assign any mode you want to function keys CTRL-F2 - CTRL-F8.
+
+Pressing these keys will load mode{x}.bin.
+
+.MDE files are executed with the I2C write command shown below from inside your code.
+
+You may also launch a mode(x).mde file using the BRUN command from the mode 1 console.
+
+
+
+
+Code Example:
+=============
+
+An example of the I2C MDE call looks like this:  I2C write &h42,0,3,1,2,4
+
+The last digit "4" commands Micromite Companion to launch mode4.mde.  2-255 are accepted.
+
+You may have up to 254 different .mde files on your SD card.  2-254.
+
+MDE files are considered "hidden" files and are not displayed with Micromite Companion's DIR command.
+
+An official list of .MDE modes are listed below:
+
+
+
+
+OFFICIAL MDE MODES:
+===================
+
+MODE1         Micromite Companion (Stored in the EEPROM of the Micromite Companion Project)
+MODE2         Retrotext PET/ATARI Style Mode
+MODE3         SLUG FAT PIXEL MODE
+MODE4         PROPELLER GAMING ENGINE Mode
+
+
+If you have created an MDE which you feel should be considered in the official collection,
+please post it to the forums with a request for it to be assigned an MDE mode number in our list.
+
+We have 251 mode modes waiting to be filled.
+
+Jeff
+
+

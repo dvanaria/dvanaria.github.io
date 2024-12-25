@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nandland Go Board (FPGA)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #FFF;
+            padding: 0 10px;
+            background-color: #4287f5;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        },
+
+        hr.rounded {
+           border-top: 8px solid #bbb;
+           border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>Project 4: Mechanical Bouncing and In-Circuit Debounce</h1>
+      <ul>
+        Page maintained by <a style="color:#D3D3D3;" href="https://dvanaria.github.io/">Darron Vanaria</a><br />
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </ul>
+      </div>
+        <aside>This project solves a problem that arose in the last project (press and release button 1 
+               toggles the on/off state of LED 1). The button appeared to not always work. The reason for
+               this: the LED state was toggled only on the downward edge of the button 1 signal
+               (transitioning from high to low), which is fine, but because of the phenomenon of "mechanical
+               bounce" that signal would fluctuate from high to low rapidly (on the order of micro-seconds)
+               and thus toggle the LED state (imperceptibly) a dozen times or so with each button release!
+               </aside>
+
+            <p><strong>It would only "appear" to work if it bounced an EVEN number of times (ON, OFF, ON, OFF)
+               because an ODD number of bounces would leave the LED state in the same state it was in
+               before (ON, OFF, ON, OFF, ON).</strong>
+             </p>
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/2.png" alt="dev board image" />
+      </div> 
+    </header>
+<p>It would take some time for that bouncing to settle and for the signal to stabilize on the
+   low level. This could take anywhere from 5 ms to 50 ms, but in general, if we could just wait
+   for around 10 ms or so, that should be plenty of time for the bouncing to stop and the signal
+   to be "valid".</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/5.png" alt="dev board image" />
+      </div> 
+   </p>That way, a single (clean) transition from high to low could be passed through to the rest
+       of the circuit, toggling the LED state cleanly (ONCE and only once).</p>
+
+<br>
+<br>
+<br>
+    <h3>
+    High-Level Design of Solution
+    </h3>
+      <div style="text-align: center;">
+         <img class"large" src="./images/3.png" alt="dev board image" />
+      </div> 
+    <div>
+    <p>We could introduce a new component (a black box) in FRONT of the design
+       that was used in Project 3, one that takes in the Button 1 signal and
+       waits for the signal to stablize for 10 ms (either high for 10 ms or 
+       low for 10 ms). Once stable, it could send this signal along to the 
+       rest of the circuit.</p>
+    <p>To implement this new component, a COUNTER will be needed, which is 
+       going to have to be precisely linked to the external 25 MHz clock. We
+       need a counter that will look at the signal of Button 1, and start 
+       counting if the signal doesn't change for a bit - if it reaches 10 ms, 
+       it will pass that signal along. If the
+       signal changes before then, it will reset to 0 and start counting again.</p> 
+ 
+
+
+
+<br>
+<hr class="rounded">
+<br>
+    <h3>
+    How to Build a Counter
+    </h3>
+    <div>
+ 
+    <p>The d-flip-flop is linked to the external clock, and so is "fired"
+       every 40 ns (the external clock is 25 MHz, so if you divide 1 second
+       by 25,000,000 cycles, you'll find 0.000000040 sec per clock cycle).</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/1.png" alt="dev board image" />
+      </div> 
+
+    <p>D-flip-flops can be linked together to build a counter, since they
+       maintain state, each can be a 1-bit digit of a larger number. Here's 
+       an example of a 4-bit counter, which can count from 0 to 15:</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/6.png" alt="dev board image" />
+      </div> 
+    <p>Here is how the registers are connected:</p>
+    <ul>
+      <li>First connect each Q output to the next Clk input.</li>
+      <div style="text-align: center;">
+         <img class"large" src="./images/7.png" alt="dev board image" />
+      </div> 
+      <li>Next connect each ~Q output back to the same register's D input.</li>
+      <div style="text-align: center;">
+         <img class"large" src="./images/8.png" alt="dev board image" />
+      </div> 
+    </ul>
+
+    <p>If we just used 4 bits (4 registers connected this way), it would count
+       from 0 to 15 in just 0.00000064 seconds (640 ns, the result of 40 ns x 16 cycles)</p>
+    <p>The question is, how many bits would be needed to count up to 10 ms?</p>
+    <p><strong>How many cycles are in 10 ms, if each cycle takes 40 ns?</strong></p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/4.png" alt="dev board image" />
+      </div> 
+    <p>From the image above, you see that 10 ms would require counting up to 250,000 cycles.</p>
+    <p>How many bits are required for this? </p>
+    <ul> 
+       <li>2^4 = 16</li>
+       <li>2^17 = 131,072</li>
+       <li>2^18 = 262,144  <--- this will work</li>
+       <li>2^19 = 524,288</li>
+    </ul>
+    <p>18 bits would do it (18 registers wired together).</p>
+<br>
+<br>
+<br>
+    <h3>
+    Implement "Debounce Switch" Component
+    </h3>
+      <div style="text-align: center;">
+         <img class"large" src="./images/11.png" alt="dev board image" />
+      </div> 
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/10.png" alt="dev board image" />
+      </div> 
+<br>
+<br>
+<br>
+     <p>Registers are "created" in VHDL by being assigned to in a process 
+        block (one that is clock driven, but having a clock signal in it's 
+        sensitivity list).
+     </p>
+
+      <div style="text-align: center;">
+         <img class"large" src="./images/13.png" alt="dev board image" />
+      </div> 
+<br>
+<hr class="rounded">
+<br>
+
+    <p>
+        Looking at the final design, it may be surprising how many LUTs are 
+        consumed. Most of these are needed to implement the compartor logic
+        in the line "if r_Count < c_DEBOUNCE_LIMIT". In order to compare values,
+        quite a few gates are needed. 
+    </p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/9.png" alt="dev board image" />
+      </div> 
+
+    <p>
+        Here's an example of a comparator that is comparing two 2-bit numbers.
+        If this many gates are needed for just 2-bits, you can imagine how many 
+        will be needed to compare two 18-bit numbers.
+    </p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/12.png" alt="dev board image" />
+      </div> 
+
+
+
+
+
+<br>
+<hr class="rounded">
+<br>
+
+
+<br>
+<h3>Solution Files:</h3>
+<ul>
+<a style="color:#D3D3D3;" href="./source_code/project_4.v">project_4.v</a><br />
+<a style="color:#D3D3D3;" href="./source_code/project_4.vhd">project_4.vhd</a><br />
+</ul>
+<br>
+
+
+<br>
+<hr class="rounded">
+<br>
+
+      <div style="text-align: center;">
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </div>
+
+
+<br>
+<br>
+
+
+
+
+
+
+</body>
+
+</html>

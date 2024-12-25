@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nandland Go Board (FPGA)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #FFF;
+            padding: 0 10px;
+            background-color: #a477d5;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        },
+
+        hr.rounded {
+           border-top: 8px solid #bbb;
+           border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>Project 1: Push button to control LED</h1>
+      <ul>
+        Page maintained by <a href="https://dvanaria.github.io/">Darron Vanaria</a><br />
+        Return to <a href="../../index.htm">Main FPGA Project Page</a><br />
+      </ul>
+      </div>
+        <aside>This is a basic project that will connect the 4 push-buttons on the 
+               Go board to the 4 LEDs elsewhere on the board (passing through the FPGA).</aside>
+
+
+    </header>
+
+
+
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/1.png" alt="dev board image" />
+      </div>      </p>
+      <p>
+
+
+
+
+    <h3>
+    The Constraints File
+    </h3>
+    <p>
+    After the synthesis step, iCEcube2 will need a constraints file in order to
+    resolve top-level FPGA pins to the design. For the Nandland Go board, the
+    constraints file can be found on the Nandland website, or copy it directly
+    from here:
+    </p>
+
+
+      <div style="text-align: center;">
+          <a href="../Go_Board_Constraints.pcf">Go_Board_Constraints.pcf</a><br />
+      </div> 
+<br>
+The constraints file contains the physical pin assignments for the following signals:
+<ul>
+<li>1 pin for FPGA Clock</li>
+<li>4 pins for LEDs</li>
+<li>4 pins for Switches (push buttons)</li>
+<li>14 pins connect to two 7-segment displays</li>
+<li>2 pins connect to UART</li>
+<li>11 pins for VGA Output (HSync, VSync, 3 each for R,G,B)</li>
+<li>8 pins for PMOD Signals</li>
+</ul>
+
+      <div style="text-align: center;">
+         <img class"large" src="../../images/2.png" alt="dev board image" />
+      </div>    
+
+<h3>
+VHDL Solution
+</h3>
+This is a pretty straightforward solution, tying each push-button signal
+directly to it's corresponding LED:
+      <div style="text-align: center;">
+         <img class"large" src="./images/2.png" alt="dev board image" />
+      </div>  
+<br>
+<h3>Solution Files:</h3>
+<ul>
+<a href="./source_code/project_1.v">project_1.v</a><br />
+<a href="./source_code/project_1.vhd">project_1.vhd</a><br />
+</ul>
+<br>
+
+<br>
+<h3>Workflow in iCEcube2</h3>
+<ol>
+<li>Start a New Project</li>
+      <div style="text-align: center;">
+         <img class"large" src="./images/3.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Add source code files</li>
+      <div style="text-align: center;">
+         <img class"large" src="./images/4.png" alt="dev board image" />
+      </div>
+<br> 
+<li>Run Synthesis</li>
+<ul>Synthesis converts the VHDL or Verilog code into physical elements that
+ are available on your particular FPGA. An FPGA has dedicated pieces of 
+logic on it. It has wires, Look-Up Tables, Registers, and Memory. It can have
+ other things, but these are by far the 
+most targeted elements during synthesis. </ul>
+<br>
+<li>Run Place and Route</li>
+<ul>Place and Route takes those components and places them on your FPGA. You can think of an FPGA as a large grid of these components. Place and Route will assign which component gets used where. It is a particularly important step of the FPGA build process for designs that use clocks. 
+This is the step where the Constraints file becomes important.
+</ul>
+<br>
+<li>Check resources used (when P&R completes)</li>
+      <div style="text-align: center;">
+         <img class"large" src="./images/5.png" alt="dev board image" />
+      </div>
+<br> 
+<li>Generate bitstream</li>
+      <div style="text-align: center;">
+         <img class"large" src="./images/8.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Use the Diamond Programmer to load the bitstream file onto the FPGA board.</li>
+<p>
+The .bin file is located here: <strong>project\project_Implmnt\sbt\outputs\bitmap</strong>
+</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/6.png" alt="dev board image" />
+      </div> 
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/7.png" alt="dev board image" />
+      </div> 
+<br>
+<li>Test on the actual hardware!</li>
+</ol>
+
+<br>
+<hr class="rounded">
+<br>
+
+      <div style="text-align: center;">
+        Return to <a href="../../index.htm">Main FPGA Project Page</a><br />
+      </div>
+
+
+<br>
+<br>
+
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nandland Go Board (FPGA)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #FFF;
+            padding: 0 10px;
+            background-color: #2d2e2d;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        },
+
+        hr.rounded {
+           border-top: 8px solid #bbb;
+           border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>Project 3: Register (D-Flip-Flop) to implement State Machine</h1>
+      <ul>
+        Page maintained by <a style="color:#D3D3D3;" href="https://dvanaria.github.io/">Darron Vanaria</a><br />
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </ul>
+      </div>
+        <aside>In this project, when button 1 is held down and then released, the release
+               action of the button will trigger the state of LED 1 to change. So if the
+               LED is illuminated and you hold down button 1, when you RELEASE it, the LED
+               will go off. Hold button 1 down and release it again, the LED will light up
+               again.</aside>
+
+    </header>
+
+<p>Somehow the circuit needs to maintain the current state of LED 1. It must also be able
+to detect the moment when button 1 goes from 1 (high, depressed) to 0 (low, released). In
+order to implement those kinds of features, another (fundamental) component of the FPGA's
+logic element is required: the d-flip-flop, or "register".</p> 
+      <div style="text-align: center;">
+         <img class"large" src="./images/9.png" alt="dev board image" />
+      </div> 
+
+<br>
+<br>
+
+
+
+    <h3>
+    How a D-Flip-Flop Works
+    </h3>
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/2.png" alt="dev board image" />
+      </div>      </p>
+      <p>
+    <p>
+    A clock signal is one of the inputs, and whenever a rising edge or falling edge occurs in the
+    clock signal, the D input is "latched" to the Q output. These can be configured to latch on
+    only the rising edge of the clock. All d-flip-flops in the
+    system get updated simultaneously.
+    </p>
+
+    <p>
+    There is also a SET/RESET input that will set Q (either synchronously with the clock
+    or immediately, i.e. asynchronously). The value the register is reset to can be 
+    configured to be either 1 or 0 at design time.
+    </p>
+ 
+    <p>
+    Most importantly (for this project) there is a Clock Enable (EN) input to the register
+    which can effectively "disconnect" the clock pulse for a period of time, allowing the
+    register to retain it's memory indefinitely, without worry to the fluctuating input on
+    D.
+    </p>
+
+    Here's a diagram of how input D is latched to output Q only the rising edge of the
+    clock signal:
+      <div style="text-align: center;">
+         <img class"large" src="./images/11.png" alt="dev board image" />
+      </div>  
+
+
+
+<br>
+<br>
+    <h3>
+    Implementing Project 3:
+    </h3>
+    <p>The "entity" section of the VHDL source file will contain the external 
+       connections the FPGA will be using that connect to the various parts of
+       the Go Board. Here we're using the signal from button 1, the clock that
+       is onboard (25 MHz), and the signal that goes to LED 1.</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/12.png" alt="dev board image" />
+      </div> 
+      <br>
+    <p>The way a d-flip-flop is implemented in code, you first have to declare
+       "signals" in the architecture section, one for each d-flip-flop that will
+       be needed. For this project, we need one register to track the state of
+       i_Switch_1 (so that the previous time-slice's state can be compared to the
+       current time-slice's state, i.e. edge detection). We need a second register
+       to maintain the state of LED_1 between button releases.</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/13.png" alt="dev board image" />
+      </div> 
+      <br>
+
+
+<p>Interestingly, this alone doesn't create the d-flip-flop. For that, we need to add
+a "process" block:</p>
+</ul>
+<li>The process block is used to write VHDL code which is executed sequentially. Some of the fundamental features of the process block include sensitivity lists, variables and assignment scheduling.</li>
+<li>We use the VHDL <strong>process</strong> keyword to create blocks of code which are executed sequentially. This is especially important when we describe sequential circuits as we must describe behavior which occurs in a specific sequence.<li>
+
+    
+    The code snippet below shows the general syntax for the VHDL process.
+      <div style="text-align: center;">
+         <img class"large" src="./images/14.png" alt="dev board image" />
+      </div>
+
+    <p>The process block above (yellow box) defines a single clock in the
+        sensitivity list. This means that the statements within the process
+        block will ONLY execute when there is a change in state in that signal
+        in the sensitivy list (and this particular one uses a library function
+        to detect on the rising edge of each clock cycle).</p>
+    
+    <p>The red boxes are were the actual d-flip-flops are "created" by the 
+        iCEcube2 compiler. Since they are being assigned within a clocked process block,
+        they will be implemented as registers.</p>
+<br>
+<br>
+
+<br>
+<h3>Final Design:</h3>
+
+Here is the final schematic of project 3 implemented, along with the Place and Route 
+data presented by the iCEcube2 compiler:
+<br>
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/10.png" alt="dev board image" />
+      </div>
+<br>
+      <div style="text-align: center;">
+         <img class"large" src="./images/8.png" alt="dev board image" />
+      </div>
+
+<br>
+<h3>Solution Files:</h3>
+<ul>
+<a style="color:#D3D3D3;" href="./source_code/project_3.v">project_3.v</a><br />
+<a style="color:#D3D3D3;" href="./source_code/project_3.vhd">project_3.vhd</a><br />
+</ul>
+<br>
+
+<br>
+<br>
+    <h3>
+    Key Takeaways:
+    </h3>
+    <ol> 
+         <li>The two main approaches (implementations) of digital logic circuits
+             are SEQUENTIAL logic and COMBINATIONAL logic (and often a combination
+             of the two are used).</li>
+         <li>Sequential logic is time dependent, and even though it's usually 
+             driven by a periodic clock (consistent pulse), it doesn't have to be.
+             That "clock" signal can be manually controlled as well.</li>
+         <li>In order to implement certain features, like detecting rising or falling
+             signals, or maintaining a certain state (high or low) for a longer 
+             period of time, sequential logic is required.</li>
+         <li>In FPGAs, each logic element (1024 logic elements in the HX1K) contains
+             both a 4-input LUT, and a D-flip-flop. In this project both LUTs and 
+             registers (d-flip-flops) were used to maintain the state of an LED, and
+             to detect the falling edge of a button signal.</li>
+    </ol>
+
+
+<br>
+<hr class="rounded">
+<br>
+
+      <div style="text-align: center;">
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </div>
+
+
+<br>
+<br>
+
+
+
+
+
+
+</body>
+
+</html>

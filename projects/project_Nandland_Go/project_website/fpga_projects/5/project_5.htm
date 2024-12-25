@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nandland Go Board (FPGA)</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #FFF;
+            padding: 0 10px;
+            background-color: #2d2e2d;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        },
+
+        hr.rounded {
+           border-top: 8px solid #bbb;
+           border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+      <div style="text-align: center;">
+        <h1>Project 5: How to Drive a 7-Segment Display</h1>
+      <ul>
+        Page maintained by <a style="color:#D3D3D3;" href="https://dvanaria.github.io/">Darron Vanaria</a><br />
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </ul>
+      </div>
+        <aside>In this project, a module will be created that takes in a 4-bit binary
+               number out outputs (drives) a 7-segment display. The module can then be
+               used in a larger circuit that uses a counter to feed the module sequential
+               input (1-7) with a button press.</aside>
+
+    </header>
+
+<br>
+<p>This display has 7 signals, each going to a different LED. These are 
+labeled A-G in the diagram below:
+</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/2.png" alt="dev board image" />
+      </div> 
+
+<br>
+<br>
+<p>The 7-segment display has a standard encoding scheme.
+   For example, the binary digit 3 (0011) needs to set the following signals
+   for each of the 7 segments: A=1, B=1, C=1, D=1, E=0, F=0, G=1</p> 
+<p>Here's a chart of all the encodings:</p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/1.png" alt="dev board image" />
+      </div> 
+
+<br>
+<br>
+
+
+
+    <h3>
+    Lower Level Module Structure
+    </h3>
+    <p>This module will be used (instantiated) in a larger, project-level
+       module.</p>
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/3.png" alt="dev board image" />
+      </div>      </p>
+      <p>
+    <p>
+    This module will take in a clock signal and a 4-bit binary number. 
+    Outputs will be 7 signals, one for each of the LEDs in the display.
+    </p>
+    <p>
+    Because the LEDs are lit up in different patterns for different input
+    values (see the example above for how input 0011 lights up 5 LEDs and keeps 
+    2 off), each and every pattern must be hard-coded in the description
+    language (VHDL in this example).
+    </p>
+
+ <br>
+<br>
+<br>
+
+    <h3>
+    Higher Level Module Structure
+    </h3>
+    <p>The larger module will drive the 4-bit input to the lower-level
+       module using a switch (button) that increments a counter:</p>
+    <div>
+      <p>
+      <div style="text-align: center;">
+         <img class"large" src="./images/4.png" alt="dev board image" />
+      </div>      </p>
+      <p>
+    <p>
+
+    </p>
+    <p>
+
+    </p>
+
+ 
+
+
+
+<br>
+<h3>Solution Files:</h3>
+<ul>
+<a style="color:#D3D3D3;" href="./source_code/Nibble_to_7_Segment_Converter.v">Nibble_to_7_Segment_Converter.v</a><br />
+<a style="color:#D3D3D3;" href="./source_code/Nibble_to_7_Segment_Converter.vhd">Nibble_to_7_Segment_Converter.vhd</a><br />
+<a style="color:#D3D3D3;" href="./source_code/project_5.v">project_5.v</a><br />
+<a style="color:#D3D3D3;" href="./source_code/project_5.vhd">project_5.vhd</a><br />
+</ul>
+<br>
+
+
+
+<br>
+<hr class="rounded">
+<br>
+
+      <div style="text-align: center;">
+        Return to <a style="color:#D3D3D3;" href="../../index.htm">Main FPGA Project Page</a><br />
+      </div>
+
+
+<br>
+<br>
+
+
+
+
+
+
+</body>
+
+</html>
