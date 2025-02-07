@@ -1,0 +1,46 @@
+/* Filetype: Cascading Style Sheet (CSS) File
+ * Filename: dv.css
+ * Filesize: 888 bytes
+ * Date Created: 07/16/2012
+ * Last Modified: Mon Jul 16, 2012  02:15PM
+ * Written By: Fire Head Fred
+ * LOC: 39
+ */
+ 
+.banner{
+position:absolute;
+top:10px;
+left:220px;
+}
+.links{
+background:white;
+width:200px;
+position:absolute;
+top:104px;
+left:0px;
+text-align:right;
+font-size:20px;
+font-family:"veranda";
+}
+.content{
+border:1px solid black;
+background:white;
+width:690px;
+position:absolute;
+top:104px;
+left:220px;
+font-size:20px;
+font-family:"veranda";
+padding:20px;
+}
+.photo {
+display:block; /* images must be set to block in order use auto margins */
+margin:0 auto; /* centers images in most browsers */
+text-align:center; /* centers images in older browsers */
+}
+.title {
+background:white;
+font-size:30px;
+font-family:"veranda";
+text-align:center;
+}
